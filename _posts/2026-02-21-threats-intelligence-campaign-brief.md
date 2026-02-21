@@ -11,7 +11,7 @@ tags:
 summary: "Technical threat intelligence report mapping hapvida.exe activity to MITRE ATT&CK tactics."
 description: "Detailed breakdown of The Gentlemen ransomware operational commands and references extracted from hapvida.exe."
 image:
-  path: /assets/img/the-gentlemen-ransomware/the-gentlemen.jpg
+  path: /assets/img/the-gentlemen-ransomware/gentlemen-cover.webp
   alt: The Gentlemen Ransomware
 ---
 # hapvida.exe — Extracted Commands & References by MITRE ATT&CK Tactic
