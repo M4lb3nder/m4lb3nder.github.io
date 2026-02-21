@@ -1,6 +1,6 @@
 ---
 title: "Threat Intelligence 01: Campaign Brief"
-date: 2026-02-21 14:30:00 +0200
+date: 2026-02-20 14:30:00 +0200
 categories:
   - Threats Intelligences
 tags:
@@ -11,7 +11,7 @@ tags:
 summary: "Tracking an active campaign with TTP mapping, IOC extraction, and defensive recommendations."
 description: "Threat intelligence brief covering campaign overview, attacker behavior, and actionable detections."
 image:
-  path: /assets/img/avatar.jpg
+  path: /assets/img/avatar.webp
   alt: M4lB3nder Threat Intelligence
 ---
 
