@@ -10,6 +10,9 @@ tags:
   - ttp
 summary: "Tracking an active campaign with TTP mapping, IOC extraction, and defensive recommendations."
 description: "Threat intelligence brief covering campaign overview, attacker behavior, and actionable detections."
+image:
+  path: /assets/img/avatar.jpg
+  alt: M4lB3nder Threat Intelligence
 ---
 
 ## Executive Summary
