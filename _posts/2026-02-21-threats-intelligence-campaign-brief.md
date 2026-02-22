@@ -1,14 +1,14 @@
 ---
-title: "Threats Intelligence 01: The Gentlemen Ransomware"
-date: 2026-02-20 18:00:00 +0200
+title: "Threat Intelligence 01: The Gentlemen Ransomware"
+date: 2026-02-21 18:00:00 +0200
 categories:
-  - Threats Intelligences
+  - Threat Intelligence
 tags:
   - threat-intelligence
   - ransomware
   - mitre-attack
   - malware-analysis
-summary: "The Gentlemen Ransomware is a highly sophisticated, fast-moving ransomware group that emerged in July-August 2025, quickly establishing itself as a major global cyber threat. The group operates under a Ransomware-as-a-Service (RaaS) model, offering affiliates a customizable, cross-platform toolkit targeting different environments."
+summary: "The Gentlemen Ransomware is a fast-moving ransomware group that emerged in July-August 2025 and quickly established itself as a global threat. The group operates under a Ransomware-as-a-Service (RaaS) model and provides affiliates with a customizable, cross-platform toolkit."
 description: "Technical threat intelligence report on The Gentlemen Ransomware, a fast-moving RaaS operation using double extortion, broad targeting, and adaptive evasion tradecraft."
 image:
   path: /assets/img/the-gentlemen-ransomware/gentlemen-cover.webp
@@ -17,9 +17,13 @@ image:
 
 # The Gentlemen Ransomware
 
-The Gentlemen Ransomware is a fast-moving, high-impact threat actor that emerged in **July-August 2025** and rapidly evolved into a global ransomware operation. The group follows a **Ransomware-as-a-Service (RaaS)** model, supplying affiliates with a customizable cross-platform toolkit for enterprise-scale intrusions.
+The Gentlemen Ransomware is a fast-moving, high-impact threat actor that emerged in **July-August 2025** and rapidly evolved into a global ransomware operation. The group follows a **Ransomware-as-a-Service (RaaS)** model, supplying affiliates with a customizable cross-platform toolkit for enterprise intrusions.
 
 Since first observation, The Gentlemen has targeted medium-to-large organizations across **17+ countries**, with notable pressure on manufacturing, construction, healthcare, and insurance sectors. Its operations rely on **double extortion**, aggressive defense evasion, and modern cryptography (**ChaCha20** + **RSA-4096**) to maximize disruption and negotiation leverage.
+
+![Twitter account](/assets/img/the-gentlemen-ransomware/gentlemen-account.webp)
+
+*Twitter account*
 
 ---
 
@@ -46,11 +50,15 @@ Since first observation, The Gentlemen has targeted medium-to-large organization
 | **Leak Site (Tor)** | `http://.onion/` |
 | **Tor Browser** | `https://www.torproject.org/download/` |
 
+![The leak website](/assets/img/the-gentlemen-ransomware/ransomware-leak-website.webp)
+
+*The leak website*
+
 ---
 
 ## 2. Reconnaissance & Discovery
 
-Network scanning performed using **Advanced IP Scanner** and **Nmap**. Enumerates all local drives and Windows Failover Cluster Shared Volumes (CSV) for encryption targeting.
+Network scanning is performed using **Advanced IP Scanner** and **Nmap**. The operators enumerate local drives and Windows Failover Cluster Shared Volumes (CSV) for encryption targeting.
 
 ### Enable Network Discovery
 
@@ -93,8 +101,8 @@ Execution of components with elevated privileges to gain full environment contro
 ### WMI Elevated Process Creation
 
 ```powershell
-$p = [WMICLASS]"\\%s\root\cimv2:Win32_Process"
-$p.Create("%s")
+$p = [WMICLASS]"\\<target-host>\root\cimv2:Win32_Process"
+$p.Create("<command>")
 ```
 
 ---
@@ -112,7 +120,7 @@ $p.Create("%s")
 powershell -Command "Set-MpPreference -DisableRealtimeMonitoring $true;
 Add-MpPreference -ExclusionPath 'C:\';
 Add-MpPreference -ExclusionPath 'C:\Temp';
-Add-MpPreference -ExclusionPath '\<share$>';"
+Add-MpPreference -ExclusionPath '\\<share$>';"
 ```
 
 ### Forced Override
@@ -124,10 +132,10 @@ Set-MpPreference -DisableRealtimeMonitoring $true -Force
 ### Remote — Cross-System Execution
 
 ```powershell
-Invoke-Command -ComputerName %s -ScriptBlock {
+Invoke-Command -ComputerName <target-host> -ScriptBlock {
     Set-MpPreference -DisableRealtimeMonitoring $true;
     Add-MpPreference -ExclusionPath 'C:\';
-    Add-MpPreference -ExclusionProcess '%s'
+    Add-MpPreference -ExclusionProcess '<process-name>'
 }
 ```
 
@@ -148,14 +156,14 @@ Use of legitimate admin tools (**PsExec**, **PowerRun**, **PuTTY**) to transfer 
 ### Remote Process Execution via WMI
 
 ```powershell
-$p = [WMICLASS]"\\%s\root\cimv2:Win32_Process"
-$p.Create("%s")
+$p = [WMICLASS]"\\<target-host>\root\cimv2:Win32_Process"
+$p.Create("<command>")
 ```
 
 ### Remote Process Execution via Invoke-Command
 
 ```powershell
-Invoke-Command -ComputerName %s -ScriptBlock { Start-Process "%s" }
+Invoke-Command -ComputerName <target-host> -ScriptBlock { Start-Process "<binary-path>" }
 ```
 
 ---
@@ -165,10 +173,10 @@ Invoke-Command -ComputerName %s -ScriptBlock { Start-Process "%s" }
 GPO manipulation for domain-wide payload distribution.
 
 ```powershell
-Invoke-Command -ComputerName %s -ScriptBlock {
+Invoke-Command -ComputerName <target-host> -ScriptBlock {
     Set-MpPreference -DisableRealtimeMonitoring $true;
     Add-MpPreference -ExclusionPath 'C:\';
-    Add-MpPreference -ExclusionProcess '%s'
+    Add-MpPreference -ExclusionProcess '<process-name>'
 }
 ```
 
@@ -176,10 +184,10 @@ Invoke-Command -ComputerName %s -ScriptBlock {
 
 | Reference | Description |
 |---|---|
-| `\share$` | UNC share path used for payload staging |
+| `\\share$` | UNC share path used for payload staging |
 | `--shares` | Ransomware flag: encrypt UNC/network shares |
 | `NETLOGON` | Referenced in LanmanServer context — domain-wide deployment |
-| `autorun.ini` / `autorun.inf` | AnyDesk persistent encrypted remote access |
+| `autorun.ini` / `autorun.inf` | Potential persistence-related artifacts |
 
 ---
 
@@ -205,13 +213,13 @@ $volumes += Get-ClusterSharedVolume | ForEach-Object { $_.SharedVolumeInfo.Frien
 - Termination of backup, database, and security services: **Veeam**, **SQL**, **Oracle**, **SAP**, **Acronis**
 - Deletion of shadow copies, logs, artifacts, and security event data
 
+![The ransomware note](/assets/img/the-gentlemen-ransomware/ransomware-note.webp)
+
+*The ransomware note*
+
 ---
 
 ## 9. Victimology
-
-![Victim Distribution by Industry, Region, and Country](/assets/img/the-gentlemen-ransomware/victim-distribution.webp)
-
-*Source: Trend Micro — Victim distribution by industry, region, and country*
 
 ### Target Industries
 
@@ -220,6 +228,10 @@ $volumes += Get-ClusterSharedVolume | ForEach-Object { $_.SharedVolumeInfo.Frien
 ### Target Regions
 
 `Asia-Pacific` · `South America` · `North America` · `Middle East` · `Others`
+
+![Victim Distribution by Industry, Region, and Country](/assets/img/the-gentlemen-ransomware/victim-distribution.webp)
+
+*Source: Trend Micro — Victim distribution by industry, region, and country*
 
 ---
 
