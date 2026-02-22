@@ -22,7 +22,7 @@ The Gentlemen Ransomware is a fast-moving, high-impact threat actor that emerged
 Since first observation, The Gentlemen has targeted medium-to-large organizations across **17+ countries**, with notable pressure on manufacturing, construction, healthcare, and insurance sectors. Its operations rely on **double extortion**, aggressive defense evasion, and modern cryptography (**ChaCha20** + **RSA-4096**) to maximize disruption and negotiation leverage.
 
 ![Twitter account](/assets/img/the-gentlemen-ransomware/gentlemen-account.webp)
-_Twitter account_
+_Twitter account for gnetlemen group_
 
 ---
 
