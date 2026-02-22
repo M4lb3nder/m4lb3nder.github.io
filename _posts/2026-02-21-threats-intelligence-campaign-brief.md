@@ -9,7 +9,7 @@ tags:
   - mitre-attack
   - malware-analysis
 summary: "The Gentlemen Ransomware is a highly sophisticated, fast-moving ransomware group that emerged in July-August 2025, quickly establishing itself as a major global cyber threat. The group operates under a Ransomware-as-a-Service (RaaS) model, offering affiliates a customizable, cross-platform toolkit targeting different environments."
-description: "The Gentlemen Ransomware is a highly sophisticated, fast-moving ransomware group that emerged in July–August 2025, quickly establishing itself as a major global cyber threat. The group operates under a Ransomware-as-a-Service (RaaS) model, offering affiliates a customizable, cross-platform toolkit targeting different environments."
+description: "Technical threat intelligence report on The Gentlemen Ransomware, a fast-moving RaaS operation using double extortion, broad targeting, and adaptive evasion tradecraft."
 image:
   path: /assets/img/the-gentlemen-ransomware/gentlemen-cover.webp
   alt: The Gentlemen Ransomware
@@ -17,9 +17,9 @@ image:
 
 # The Gentlemen Ransomware
 
-The Gentlemen Ransomware is a highly sophisticated, fast-moving ransomware group that emerged in **July–August 2025**, quickly establishing itself as a major global cyber threat. The group operates under a **Ransomware-as-a-Service (RaaS)** model, offering affiliates a customizable, cross-platform toolkit targeting different environments.
+The Gentlemen Ransomware is a fast-moving, high-impact threat actor that emerged in **July-August 2025** and rapidly evolved into a global ransomware operation. The group follows a **Ransomware-as-a-Service (RaaS)** model, supplying affiliates with a customizable cross-platform toolkit for enterprise-scale intrusions.
 
-The Gentlemen ransomware, first observed in July/August 2025, is a highly sophisticated and rapidly emerging threat targeting medium-to-large organizations across **17+ countries**. It employs **double-extortion** tactics, specifically targeting manufacturing, construction, healthcare, and insurance sectors. The group is known for adaptive, custom-built evasion tools that disable security products and encrypt data using **ChaCha20** and **RSA-4096** algorithms.
+Since first observation, The Gentlemen has targeted medium-to-large organizations across **17+ countries**, with notable pressure on manufacturing, construction, healthcare, and insurance sectors. Its operations rely on **double extortion**, aggressive defense evasion, and modern cryptography (**ChaCha20** + **RSA-4096**) to maximize disruption and negotiation leverage.
 
 ---
 
