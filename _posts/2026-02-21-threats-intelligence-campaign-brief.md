@@ -21,19 +21,18 @@ The Gentlemen Ransomware is a fast-moving, high-impact threat actor that emerged
 
 Since first observation, The Gentlemen has targeted medium-to-large organizations across **17+ countries**, with notable pressure on manufacturing, construction, healthcare, and insurance sectors. Its operations rely on **double extortion**, aggressive defense evasion, and modern cryptography (**ChaCha20** + **RSA-4096**) to maximize disruption and negotiation leverage.
 
-<figure>
-  <img src="/assets/img/the-gentlemen-ransomware/gentlemen-account.webp" alt="Twitter account">
-  <figcaption>Twitter account</figcaption>
-</figure>
+image:
+  path: /assets/img/the-gentlemen-ransomware/gentlemen-account.webp
+  alt: Twitter account
 
 ---
 
 ## Key Tactics and Techniques
 
-<figure>
-  <img src="/assets/img/the-gentlemen-ransomware/ransomware-attack-chain.webp" alt="The Ransomware Attack Chain">
-  <figcaption>Source: Trend Micro - The Ransomware Attack Chain</figcaption>
-</figure>
+image:
+  path: /assets/img/the-gentlemen-ransomware/ransomware-attack-chain.webp
+  alt: The Ransomware Attack Chain
+  caption: Source: Trend Micro - The Ransomware Attack Chain
 
 ---
 
@@ -52,10 +51,9 @@ Since first observation, The Gentlemen has targeted medium-to-large organization
 | **Leak Site (Tor)** | `http://.onion/` |
 | **Tor Browser** | `https://www.torproject.org/download/` |
 
-<figure>
-  <img src="/assets/img/the-gentlemen-ransomware/ransomware-leak-website.webp" alt="The leak website">
-  <figcaption>The leak website</figcaption>
-</figure>
+image:
+  path: /assets/img/the-gentlemen-ransomware/ransomware-leak-website.webp
+  alt: The leak website
 
 ---
 
@@ -216,10 +214,9 @@ $volumes += Get-ClusterSharedVolume | ForEach-Object { $_.SharedVolumeInfo.Frien
 - Termination of backup, database, and security services: **Veeam**, **SQL**, **Oracle**, **SAP**, **Acronis**
 - Deletion of shadow copies, logs, artifacts, and security event data
 
-<figure>
-  <img src="/assets/img/the-gentlemen-ransomware/ransomware-note.webp" alt="The ransomware note">
-  <figcaption>The ransomware note</figcaption>
-</figure>
+image:
+  path: /assets/img/the-gentlemen-ransomware/ransomware-note.webp
+  alt: The ransomware note
 
 ---
 
@@ -233,10 +230,10 @@ $volumes += Get-ClusterSharedVolume | ForEach-Object { $_.SharedVolumeInfo.Frien
 
 `Asia-Pacific` · `South America` · `North America` · `Middle East` · `Others`
 
-<figure>
-  <img src="/assets/img/the-gentlemen-ransomware/victim-distribution.webp" alt="Trend Micro - Victim distribution by industry, region, and country">
-  <figcaption>Source: Trend Micro - Victim distribution by industry, region, and country</figcaption>
-</figure>
+image:
+  path: /assets/img/the-gentlemen-ransomware/victim-distribution.webp
+  alt: Trend Micro - Victim distribution by industry, region, and country
+  caption: Source: Trend Micro - Victim distribution by industry, region, and country
 
 ---
 
