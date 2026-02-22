@@ -23,6 +23,7 @@ Since first observation, The Gentlemen has targeted medium-to-large organization
 
 ![Twitter account](/assets/img/the-gentlemen-ransomware/gentlemen-account.webp)
 _Twitter account_
+
 ---
 
 ## Key Tactics and Techniques
