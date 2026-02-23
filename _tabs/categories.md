@@ -6,7 +6,7 @@ order: 1
 
 ## Categories
 
-- Malware Analysis
-- CTFs Reversing
-- Pratical Malware Analysis Laps
-- Threats Intelligences
+- [Malware Analysis]({{ '/categories/malware-analysis/' | relative_url }})
+- [CTFs Reversing]({{ '/categories/ctfs-reversing/' | relative_url }})
+- [Pratical Malware Analysis Laps]({{ '/categories/pratical-malware-analysis-laps/' | relative_url }})
+- [Threat Intelligence]({{ '/categories/threat-intelligence/' | relative_url }})
