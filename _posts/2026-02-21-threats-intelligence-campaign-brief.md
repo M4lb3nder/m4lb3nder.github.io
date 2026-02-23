@@ -168,7 +168,7 @@ Invoke-Command -ComputerName <target-host> -ScriptBlock { Start-Process "<binary
 
 ## 6. Persistence & Propagation
 
-GPO manipulation for domain-wide payload distribution.
+Group Policy Object (GPO) manipulation for domain-wide payload distribution.
 
 ```powershell
 Invoke-Command -ComputerName <target-host> -ScriptBlock {
@@ -179,6 +179,8 @@ Invoke-Command -ComputerName <target-host> -ScriptBlock {
 ```
 
 ### NETLOGON / SYSVOL Share Abuse
+
+This technique enables operators to distribute malicious payloads via the NETLOGON share, enabling near-simultaneous infection across domain-joined machines.
 
 | Reference | Description |
 |---|---|
@@ -241,19 +243,37 @@ When launched, the ransomware executable provides an extensive help message, sho
 
 ## MITRE ATT&CK Mapping
 
-| Technique ID | Tactic | Name |
+| Tactic | Technique ID | Technique Name |
 |---|---|---|
-| T1190 | Initial Access | Exploit Public-Facing Application |
-| T1078 | Initial Access | Valid Accounts |
-| T1046 | Discovery | Network Service Discovery |
-| T1082 | Discovery | System Information Discovery |
-| T1053.005 | Privilege Escalation | Scheduled Task/Job |
-| T1047 | Execution | Windows Management Instrumentation |
-| T1562.001 | Defense Evasion | Disable or Modify Tools |
-| T1070.001 | Defense Evasion | Clear Windows Event Logs |
-| T1021.006 | Lateral Movement | Remote Services: PowerShell Remoting |
-| T1570 | Lateral Movement | Lateral Tool Transfer |
-| T1567.002 | Exfiltration | Exfiltration to Cloud Storage |
-| T1486 | Impact | Data Encrypted for Impact |
-| T1490 | Impact | Inhibit System Recovery |
-| T1489 | Impact | Service Stop |
+| Initial Access | T1190 | Exploit Public-Facing Application |
+| Initial Access | T1078 | Valid Accounts |
+| Initial Access | T1078.002 | Valid Accounts: Domain Accounts |
+| Execution | T1059 | Command and Scripting Interpreter |
+| Execution | T1059.001 | Command and Scripting Interpreter: PowerShell |
+| Execution | T1059.003 | Command and Scripting Interpreter: Windows Command Shell |
+| Persistence | T1547 | Boot or Logon Autostart Execution |
+| Persistence | T1136 | Create Account |
+| Privilege Escalation | T1068 | Exploitation for Privilege Escalation |
+| Defense Evasion | T1562 | Impair Defenses |
+| Defense Evasion | T1112 | Modify Registry |
+| Defense Evasion | T1027 | Obfuscated Files or Information |
+| Defense Evasion | T1484.001 | Domain Policy Modification: Group Policy Modification |
+| Discovery | T1046 | Network Service Discovery |
+| Discovery | T1087 | Account Discovery |
+| Discovery | T1087.002 | Account Discovery: Domain Account |
+| Discovery | T1482 | Domain Trust Discovery |
+| Lateral Movement | T1021 | Remote Services |
+| Lateral Movement | T1021.001 | Remote Services: Remote Desktop Protocol |
+| Lateral Movement | T1021.002 | Remote Services: SMB/Windows Admin Shares |
+| Lateral Movement | T1021.004 | Remote Services: SSH |
+| Collection & Exfiltration | T1074 | Data Staged |
+| Collection & Exfiltration | T1074.001 | Data Staged: Local Data Staging |
+| Collection & Exfiltration | T1039 | Data from Network Shared Drive |
+| Collection & Exfiltration | T1048 | Exfiltration Over Alternative Protocol |
+| Collection & Exfiltration | T1048.001 | Exfiltration Over Alternative Protocol: Unencrypted/Obfuscated Non-C2 Protocol |
+| Command & Control | T1071 | Application Layer Protocol |
+| Command & Control | T1071.001 | Application Layer Protocol: Web Protocols |
+| Command & Control | T1219 | Remote Access Software |
+| Impact | T1486 | Data Encrypted for Impact |
+| Impact | T1489 | Service Stop |
+| Impact | T1552 | Unsecured Credentials |
