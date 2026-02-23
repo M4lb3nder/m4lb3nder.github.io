@@ -1,7 +1,7 @@
 ---
 title: "Threat Intelligence 01: The Gentlemen Ransomware"
 date: 2026-02-23 23:00:00 +0200
-permalink: /posts/2026-02-21-threats-intelligence-campaign-brief/
+permalink: /posts/2026-02-21-threat-intelligence-campaign-brief/
 categories:
   - Threat Intelligence
 tags:
