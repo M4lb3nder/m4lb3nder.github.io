@@ -16,20 +16,6 @@ image:
   alt: The Gentlemen Ransomware
 ---
 
-# Threat Intelligence Report
-## The Gentlemen Ransomware
-
-| | |
-|---|---|
-| **Report ID** | TI-2026-001 |
-| **Classification** | TLP:WHITE |
-| **Date Published** | February 21, 2026 |
-| **Severity** | Critical |
-| **Category** | Ransomware / RaaS |
-| **Author** | Threat Intelligence Team |
-
----
-
 ## Executive Summary
 
 **The Gentlemen** is a fast-moving, high-impact ransomware operation that emerged in **July–August 2025** and rapidly evolved into a global threat. The group operates under a **Ransomware-as-a-Service (RaaS)** model, providing affiliates with a customizable, cross-platform toolkit designed for enterprise intrusions.
@@ -54,15 +40,6 @@ _Twitter account_
 | **Ransom Note** | `README-GENTLEMEN.txt` |
 | **Countries Targeted** | 17+ |
 
-### Contact & Command References
-
-| Channel | Value |
-|---|---|
-| **Email** | `negotiation_hapvida@proton.me` |
-| **TOX ID** | `ID88984846080D639C9A4EC394E53BA616D550B2B3AD691942EA2CCD33AA5B9340FD1A8FF40E9A` |
-| **TOX Download** | `https://tox.chat/download.html` |
-| **Leak Site** | Hosted on Tor (.onion) |
-| **Tor Browser** | `https://www.torproject.org/download/` |
 
 ---
 
@@ -290,43 +267,90 @@ _The Ransomware Note_
 _Trend Micro - Victim distribution by industry, region, and country_
 
 ---
+## Technical Analysis
 
+### Execution Arguments
+Ransomware performs a command-line argument parsing. These arguments are used to provide detailed control over encryption targets, performance options, and operation modes.
+
+| Argument          | Description                                              |
+| ----------------- | -------------------------------------------------------- |
+| `--password PASS` | Required to execute ransomware                           |
+| `--path DIRS`     | Enumerate directories and disks to encrypt               |
+| `--T MIN`         | Delay before encryption                                  |
+| `--silent`        | Do not rename files after encryption                     |
+| `--system`        | Encrypt local drive only                                 |
+| `--shares`        | Encrypt mapped network and available UNC shares only     |
+| `--full`          | Encrypt both `--system` and `--shares`                   |
+| `--fast`          | Encrypt 9%                                               |
+| `--superfast`     | Encrypt 3%                                               |
+| `--ultrafast`     | Encrypt 1%                                               |
+
+![Execution Arguments](/assets/img/the-gentlemen-ransomware/execution-argument.webp)
+_Ransomware executable arguments_
+`--password` is required. If the value is missing or incorrect, the ransomware immediately terminates. This helps ensure execution only in attacker-intended environments and reduces detonation in sandbox analysis environments.
+---
+### Encryption Algorithm
+#### Services Terminated Before Encryption
+
+Commonly terminated services include:
+`sql`, `vss`, `VSS`, `VSNAP`, `QBDBMgrN`, `pgAdmin3`, `pgAdmin4`, `Veeam`, `MSSQLServer`, `WSBExchange`, `GxVss`, `SAP`, `MySQL`, `MariaDB`, `PostgreSQL`, `TeamViewer`, `BackupExecAgent`, `BackupExecRPCService`, `BackupExecManagementService`, `BackupExecJobEngine`, `VeeamTransportSvc`, `OracleServiceORCL`, `MSExchange`, `SAPService`, `postmaster`, `CagService`, `DefWatch`, `SccEvtMgr`, `GxClMgr`, `CVMountd`.
+
+#### File Extension Exclusion List
+
+Skipped during encryption:
+> .exe .bat .drv .tmp .msp .prf .ms .ci .co .key .ocx .pdb .wp .xhl .pro .mod
+> .dll .ps1 .ic .sh .tab .in .cmd .ani .386 .cur .idx .sys .com .sh .sm .pas
+> .pl .cp .lad .vic .ms .su .sql .SAP .cvd .vss .Sql .Dir
+
+#### Crypto Engine
+- The ransomware contains an embedded attacker public key (decoded in memory).
+- For each file, it generates a fresh random 32-byte value and uses **X25519 (ECDH)** with the attacker public key to create a shared secret.
+- That shared secret is processed with **HChaCha20** to derive a 32-byte subkey.
+- The subkey is then used by **XChaCha20** to encrypt the file (stream cipher).
+- Nonce material is also derived from X25519-related output (split into parts for HChaCha20/XChaCha20 nonce construction).
+- The malware stores only a Base64-encoded X25519 result in the encrypted file, **not** the temporary random private value.
+- Because the victim lacks the attacker private key, recreating the shared secret and decrypting is infeasible.
+- Encryption is optimized by size:
+    - < ~1 MB (0x100000): full-file encryption
+    - > ~1 MB: partial/ranged encryption for speed while still causing high damage
+
+---
 ## MITRE ATT&CK Mapping
 
-| Tactic | Technique ID | Technique Name |
-|---|---|---|
-| Initial Access | T1190 | Exploit Public-Facing Application |
-| Initial Access | T1078 | Valid Accounts |
-| Initial Access | T1078.002 | Valid Accounts: Domain Accounts |
-| Execution | T1059 | Command and Scripting Interpreter |
-| Execution | T1059.001 | PowerShell |
-| Execution | T1059.003 | Windows Command Shell |
-| Persistence | T1547 | Boot or Logon Autostart Execution |
-| Persistence | T1136 | Create Account |
-| Privilege Escalation | T1068 | Exploitation for Privilege Escalation |
-| Defense Evasion | T1562 | Impair Defenses |
-| Defense Evasion | T1112 | Modify Registry |
-| Defense Evasion | T1027 | Obfuscated Files or Information |
-| Defense Evasion | T1484.001 | Domain Policy Modification: Group Policy Modification |
-| Discovery | T1046 | Network Service Discovery |
-| Discovery | T1087 | Account Discovery |
-| Discovery | T1087.002 | Account Discovery: Domain Account |
-| Discovery | T1482 | Domain Trust Discovery |
-| Lateral Movement | T1021 | Remote Services |
-| Lateral Movement | T1021.001 | Remote Desktop Protocol |
-| Lateral Movement | T1021.002 | SMB/Windows Admin Shares |
-| Lateral Movement | T1021.004 | SSH |
-| Collection | T1074 | Data Staged |
-| Collection | T1074.001 | Local Data Staging |
-| Collection | T1039 | Data from Network Shared Drive |
-| Exfiltration | T1048 | Exfiltration Over Alternative Protocol |
-| Exfiltration | T1048.001 | Unencrypted/Obfuscated Non-C2 Protocol |
-| Command & Control | T1071 | Application Layer Protocol |
-| Command & Control | T1071.001 | Web Protocols |
-| Command & Control | T1219 | Remote Access Software |
-| Impact | T1486 | Data Encrypted for Impact |
-| Impact | T1489 | Service Stop |
-| Impact | T1552 | Unsecured Credentials |
+| Tactic               | Technique ID | Technique Name                                        |
+| -------------------- | ------------ | ----------------------------------------------------- |
+| Initial Access       | T1190        | Exploit Public-Facing Application                     |
+| Initial Access       | T1078        | Valid Accounts                                        |
+| Initial Access       | T1078.002    | Valid Accounts: Domain Accounts                       |
+| Execution            | T1059        | Command and Scripting Interpreter                     |
+| Execution            | T1059.001    | PowerShell                                            |
+| Execution            | T1059.003    | Windows Command Shell                                 |
+| Persistence          | T1547        | Boot or Logon Autostart Execution                     |
+| Persistence          | T1136        | Create Account                                        |
+| Privilege Escalation | T1068        | Exploitation for Privilege Escalation                 |
+| Defense Evasion      | T1562        | Impair Defenses                                       |
+| Defense Evasion      | T1112        | Modify Registry                                       |
+| Defense Evasion      | T1027        | Obfuscated Files or Information                       |
+| Defense Evasion      | T1484.001    | Domain Policy Modification: Group Policy Modification |
+| Discovery            | T1046        | Network Service Discovery                             |
+| Discovery            | T1087        | Account Discovery                                     |
+| Discovery            | T1087.002    | Account Discovery: Domain Account                     |
+| Discovery            | T1482        | Domain Trust Discovery                                |
+| Lateral Movement     | T1021        | Remote Services                                       |
+| Lateral Movement     | T1021.001    | Remote Desktop Protocol                               |
+| Lateral Movement     | T1021.002    | SMB/Windows Admin Shares                              |
+| Lateral Movement     | T1021.004    | SSH                                                   |
+| Collection           | T1074        | Data Staged                                           |
+| Collection           | T1074.001    | Local Data Staging                                    |
+| Collection           | T1039        | Data from Network Shared Drive                        |
+| Exfiltration         | T1048        | Exfiltration Over Alternative Protocol                |
+| Exfiltration         | T1048.001    | Unencrypted/Obfuscated Non-C2 Protocol                |
+| Command & Control    | T1071        | Application Layer Protocol                            |
+| Command & Control    | T1071.001    | Web Protocols                                         |
+| Command & Control    | T1219        | Remote Access Software                                |
+| Impact               | T1486        | Data Encrypted for Impact                             |
+| Impact               | T1489        | Service Stop                                          |
+| Impact               | T1552        | Unsecured Credentials                                 |
 
 ---
 
@@ -343,18 +367,3 @@ _Trend Micro - Victim distribution by industry, region, and country_
 - **Hunt for indicators** — scan for `.7mzhh` extensions, `README-GENTLEMEN.txt`, and the TOX ID listed above
 
 ---
-
-## Indicators of Compromise (IoCs)
-
-| Type | Value |
-|---|---|
-| **File Extension** | `.7mzhh` |
-| **Ransom Note** | `README-GENTLEMEN.txt` |
-| **Email** | `negotiation_hapvida@proton.me` |
-| **TOX ID** | `ID88984846080D639C9A4EC394E53BA616D550B2B3AD691942EA2CCD33AA5B9340FD1A8FF40E9A` |
-| **Artifact** | `autorun.ini` / `autorun.inf` |
-| **Tools** | Advanced IP Scanner, Nmap, PsExec, PowerRun, PuTTY, WinSCP |
-
----
-
-*This report is classified TLP:WHITE and may be shared freely. For questions or additional intelligence, contact the Threat Intelligence Team.*
