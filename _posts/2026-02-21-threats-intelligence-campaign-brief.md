@@ -16,27 +16,72 @@ image:
   alt: The Gentlemen Ransomware
 ---
 
-# The Gentlemen Ransomware
+# Threat Intelligence Report
+## The Gentlemen Ransomware
 
-The Gentlemen Ransomware is a fast-moving, high-impact threat actor that emerged in **July-August 2025** and rapidly evolved into a global ransomware operation. The group follows a **Ransomware-as-a-Service (RaaS)** model, supplying affiliates with a customizable cross-platform toolkit for enterprise intrusions.
+| | |
+|---|---|
+| **Report ID** | TI-2026-001 |
+| **Classification** | TLP:WHITE |
+| **Date Published** | February 21, 2026 |
+| **Severity** | Critical |
+| **Category** | Ransomware / RaaS |
+| **Author** | Threat Intelligence Team |
 
-Since first observation, The Gentlemen has targeted medium-to-large organizations across **17+ countries**, with notable pressure on manufacturing, construction, healthcare, and insurance sectors. Its operations rely on **double extortion**, aggressive defense evasion, and modern cryptography (**ChaCha20** + **RSA-4096**) to maximize disruption and negotiation leverage.
+---
+
+## Executive Summary
+
+**The Gentlemen** is a fast-moving, high-impact ransomware operation that emerged in **July–August 2025** and rapidly evolved into a global threat. The group operates under a **Ransomware-as-a-Service (RaaS)** model, providing affiliates with a customizable, cross-platform toolkit designed for enterprise intrusions.
+
+Since initial observation, The Gentlemen has targeted medium-to-large organizations across **17+ countries**, exerting particular pressure on the manufacturing, construction, healthcare, and insurance sectors. Operations rely on **double extortion tactics**, aggressive defense evasion, and modern cryptography (**ChaCha20 + RSA-4096**) to maximize disruption and negotiation leverage.
 
 ![Twitter account](/assets/img/the-gentlemen-ransomware/gentlemen-account.webp)
 _Twitter account_
 
 ---
 
-## Key Tactics and Techniques
+## Threat Actor Profile
+
+| Attribute | Detail |
+|---|---|
+| **Actor Name** | The Gentlemen |
+| **First Observed** | July–August 2025 |
+| **Operation Type** | Ransomware-as-a-Service (RaaS) |
+| **Extortion Method** | Double Extortion |
+| **Encryption** | ChaCha20 + RSA-4096 |
+| **File Extension** | `.7mzhh` |
+| **Ransom Note** | `README-GENTLEMEN.txt` |
+| **Countries Targeted** | 17+ |
+
+### Contact & Command References
+
+| Channel | Value |
+|---|---|
+| **Email** | `negotiation_hapvida@proton.me` |
+| **TOX ID** | `ID88984846080D639C9A4EC394E53BA616D550B2B3AD691942EA2CCD33AA5B9340FD1A8FF40E9A` |
+| **TOX Download** | `https://tox.chat/download.html` |
+| **Leak Site** | Hosted on Tor (.onion) |
+| **Tor Browser** | `https://www.torproject.org/download/` |
+
+---
+
+## Attack Chain Overview
+
+The Gentlemen follows a structured intrusion lifecycle — from initial access through to data exfiltration and ransomware deployment. The phases below map the full attack chain as observed across confirmed incidents.
 
 ![The Ransomware Attack Chain](/assets/img/the-gentlemen-ransomware/ransomware-attack-chain.webp)
 _Trend Micro - The Ransomware Attack Chain_
 
 ---
 
-## 1. Initial Access
+## Phase 1 — Initial Access
 
-- Exploitation of internet-facing services
+**Techniques:** `T1190` · `T1078` · `T1078.002`
+
+The group gains entry through two primary vectors:
+
+- Exploitation of internet-facing services (e.g., VPN appliances, public-facing applications)
 - Abuse of compromised **FortiGate** administrative accounts
 
 ### C2 & Contact Reference
@@ -54,9 +99,11 @@ _The Ransomware Leak Website_
 
 ---
 
-## 2. Reconnaissance & Discovery
+## Phase 2 — Reconnaissance & Discovery
 
-Network scanning is performed using **Advanced IP Scanner** and **Nmap**. The operators enumerate local drives and Windows Failover Cluster Shared Volumes (CSV) for encryption targeting.
+**Techniques:** `T1046` · `T1087` · `T1087.002` · `T1482`
+
+Network scanning is performed using **Advanced IP Scanner** and **Nmap**. Operators enumerate local drives and Windows Failover Cluster Shared Volumes (CSV) to identify encryption targets.
 
 ### Enable Network Discovery
 
@@ -68,14 +115,17 @@ Get-NetFirewallRule -DisplayGroup "Network Discovery" | Enable-NetFirewallRule
 
 ```powershell
 $volumes = @()
-$volumes += Get-WmiObject -Class Win32_Volume | Where-Object { $_.Name -like '*:\*' } | Select-Object -ExpandProperty Name
+$volumes += Get-WmiObject -Class Win32_Volume |
+    Where-Object { $_.Name -like '*:\*' } |
+    Select-Object -ExpandProperty Name
 try {
-    $volumes += Get-ClusterSharedVolume | ForEach-Object { $_.SharedVolumeInfo.FriendlyVolumeName }
+    $volumes += Get-ClusterSharedVolume |
+        ForEach-Object { $_.SharedVolumeInfo.FriendlyVolumeName }
 } catch {}
 $volumes
 ```
 
-### System Information Banner
+### System Banner (Observed in Samples)
 
 ```powershell
 Write-Host "Windows version <version>" -BackgroundColor Blue -ForegroundColor White
@@ -84,11 +134,11 @@ Write-Host "The Gentlemen" -BackgroundColor DarkGray -ForegroundColor White -NoN
 
 ---
 
-## 3. Privilege Escalation
+## Phase 3 — Privilege Escalation
 
-Execution of components with elevated privileges to gain full environment control.
+**Techniques:** `T1068`
 
-### Elevated Execution Flags
+Components are executed with elevated privileges to gain full environment control.
 
 | Flag | Description |
 |---|---|
@@ -105,14 +155,18 @@ $p.Create("<command>")
 
 ---
 
-## 4. Defense Evasion
+## Phase 4 — Defense Evasion
+
+**Techniques:** `T1562` · `T1112` · `T1027` · `T1484.001`
+
+Observed evasion techniques include:
 
 - Deployment of **kernel-level anti-AV** utilities
 - Configuration of AV/Defender exclusion paths
 - Neutralization of **EDR** tools
 - Disabling **Microsoft Defender** real-time protection
 
-### Local — Disable & Exclude
+### Disable & Exclude (Local)
 
 ```powershell
 powershell -Command "Set-MpPreference -DisableRealtimeMonitoring $true;
@@ -127,7 +181,7 @@ Add-MpPreference -ExclusionPath '\\<share$>';"
 Set-MpPreference -DisableRealtimeMonitoring $true -Force
 ```
 
-### Remote — Cross-System Execution
+### Remote Cross-System Execution
 
 ```powershell
 Invoke-Command -ComputerName <target-host> -ScriptBlock {
@@ -147,97 +201,93 @@ Invoke-Command -ComputerName <target-host> -ScriptBlock {
 
 ---
 
-## 5. Lateral Movement & Remote Execution
+## Phase 5 — Lateral Movement & Remote Execution
 
-Use of legitimate admin tools (**PsExec**, **PowerRun**, **PuTTY**) to transfer and execute payloads across systems.
+**Techniques:** `T1021` · `T1021.001` · `T1021.002` · `T1021.004`
 
-### Remote Process Execution via WMI
+Legitimate administration tools are leveraged for payload transfer and execution across systems, including **PsExec**, **PowerRun**, and **PuTTY**.
+
+### Remote Execution via WMI
 
 ```powershell
 $p = [WMICLASS]"\\<target-host>\root\cimv2:Win32_Process"
 $p.Create("<command>")
 ```
 
-### Remote Process Execution via Invoke-Command
+### Remote Execution via Invoke-Command
 
 ```powershell
-Invoke-Command -ComputerName <target-host> -ScriptBlock { Start-Process "<binary-path>" }
+Invoke-Command -ComputerName <target-host> -ScriptBlock {
+    Start-Process "<binary-path>"
+}
 ```
 
 ---
 
-## 6. Persistence & Propagation
+## Phase 6 — Persistence & Propagation
 
-Group Policy Object (GPO) manipulation for domain-wide payload distribution.
+**Techniques:** `T1547` · `T1136`
 
-```powershell
-Invoke-Command -ComputerName <target-host> -ScriptBlock {
-    Set-MpPreference -DisableRealtimeMonitoring $true;
-    Add-MpPreference -ExclusionPath 'C:\';
-    Add-MpPreference -ExclusionProcess '<process-name>'
-}
-```
+Group Policy Object (GPO) manipulation is used for domain-wide payload distribution.
 
-### NETLOGON / SYSVOL Share Abuse
+### NETLOGON Share Abuse
 
 This technique enables operators to distribute malicious payloads via the NETLOGON share, enabling near-simultaneous infection across domain-joined machines.
 
 | Reference | Description |
 |---|---|
-| `\\share$` | UNC share path used for payload staging |
-| `--shares` | Ransomware flag: encrypt UNC/network shares |
+| `\\share$` | UNC path used for payload staging |
+| `--shares` | Ransomware flag — encrypt UNC/network shares |
 | `NETLOGON` | Referenced in LanmanServer context — domain-wide deployment |
 | `autorun.ini` / `autorun.inf` | Potential persistence-related artifacts |
 
 ---
 
-## 7. Data Collection & Exfiltration
+## Phase 7 — Data Collection & Exfiltration
 
-- Staging of sensitive data prior to exfiltration
-- Encrypted **SFTP** exfiltration using **WinSCP**
+**Techniques:** `T1074` · `T1074.001` · `T1039` · `T1048` · `T1048.001`
 
-### Volume Enumeration
+Sensitive data is staged prior to exfiltration. Exfiltration is conducted over encrypted **SFTP** using **WinSCP**.
 
 ```powershell
-$volumes += Get-WmiObject -Class Win32_Volume | Where-Object { $_.Name -like '*:\*' } | Select-Object -ExpandProperty Name
-$volumes += Get-ClusterSharedVolume | ForEach-Object { $_.SharedVolumeInfo.FriendlyVolumeName }
+$volumes += Get-WmiObject -Class Win32_Volume |
+    Where-Object { $_.Name -like '*:\*' } |
+    Select-Object -ExpandProperty Name
+$volumes += Get-ClusterSharedVolume |
+    ForEach-Object { $_.SharedVolumeInfo.FriendlyVolumeName }
 ```
 
 ---
 
-## 8. Ransomware Deployment & Impact
+## Phase 8 — Ransomware Deployment & Impact
+
+**Techniques:** `T1486` · `T1489` · `T1552`
 
 - Ransomware deployed via **NETLOGON** share using domain admin credentials
-- File encryption with **`.7mzhh`** extension
+- Files encrypted with **`.7mzhh`** extension
 - Ransom note dropped as **`README-GENTLEMEN.txt`**
-- Termination of backup, database, and security services: **Veeam**, **SQL**, **Oracle**, **SAP**, **Acronis**
-- Deletion of shadow copies, logs, artifacts, and security event data
+- Backup, database, and security services terminated: **Veeam**, **SQL**, **Oracle**, **SAP**, **Acronis**
+- Deletion of shadow copies, event logs, prefetch, and other forensic artifacts
 
 ![The ransomware note](/assets/img/the-gentlemen-ransomware/ransomware-note.webp)
 _The Ransomware Note_
 
 ---
 
-## 9. Victimology
+## Victimology
 
-### Target Industries
+### Target Sectors
 
-`Manufacturing` · `Construction` · `Healthcare` · `Insurance` · `Others`
+`Manufacturing` · `Construction` · `Healthcare` · `Insurance` · `Other`
 
 ### Target Regions
 
-`Asia-Pacific` · `South America` · `North America` · `Middle East` · `Others`
+`Asia-Pacific` · `South America` · `North America` · `Middle East` · `Other`
+
+> Victims span 17+ countries with no single geographic concentration, indicating opportunistic targeting with broad sector reach.
 
 ![Victim Distribution](/assets/img/the-gentlemen-ransomware/victim-distribution.webp)
 _Trend Micro - Victim distribution by industry, region, and country_
-
----
-
-## 10. Technical Analysis
-
-### Execution Arguments
-
-When launched, the ransomware executable provides an extensive help message, showing various options and flags available.
 
 ---
 
@@ -249,8 +299,8 @@ When launched, the ransomware executable provides an extensive help message, sho
 | Initial Access | T1078 | Valid Accounts |
 | Initial Access | T1078.002 | Valid Accounts: Domain Accounts |
 | Execution | T1059 | Command and Scripting Interpreter |
-| Execution | T1059.001 | Command and Scripting Interpreter: PowerShell |
-| Execution | T1059.003 | Command and Scripting Interpreter: Windows Command Shell |
+| Execution | T1059.001 | PowerShell |
+| Execution | T1059.003 | Windows Command Shell |
 | Persistence | T1547 | Boot or Logon Autostart Execution |
 | Persistence | T1136 | Create Account |
 | Privilege Escalation | T1068 | Exploitation for Privilege Escalation |
@@ -263,17 +313,48 @@ When launched, the ransomware executable provides an extensive help message, sho
 | Discovery | T1087.002 | Account Discovery: Domain Account |
 | Discovery | T1482 | Domain Trust Discovery |
 | Lateral Movement | T1021 | Remote Services |
-| Lateral Movement | T1021.001 | Remote Services: Remote Desktop Protocol |
-| Lateral Movement | T1021.002 | Remote Services: SMB/Windows Admin Shares |
-| Lateral Movement | T1021.004 | Remote Services: SSH |
-| Collection & Exfiltration | T1074 | Data Staged |
-| Collection & Exfiltration | T1074.001 | Data Staged: Local Data Staging |
-| Collection & Exfiltration | T1039 | Data from Network Shared Drive |
-| Collection & Exfiltration | T1048 | Exfiltration Over Alternative Protocol |
-| Collection & Exfiltration | T1048.001 | Exfiltration Over Alternative Protocol: Unencrypted/Obfuscated Non-C2 Protocol |
+| Lateral Movement | T1021.001 | Remote Desktop Protocol |
+| Lateral Movement | T1021.002 | SMB/Windows Admin Shares |
+| Lateral Movement | T1021.004 | SSH |
+| Collection | T1074 | Data Staged |
+| Collection | T1074.001 | Local Data Staging |
+| Collection | T1039 | Data from Network Shared Drive |
+| Exfiltration | T1048 | Exfiltration Over Alternative Protocol |
+| Exfiltration | T1048.001 | Unencrypted/Obfuscated Non-C2 Protocol |
 | Command & Control | T1071 | Application Layer Protocol |
-| Command & Control | T1071.001 | Application Layer Protocol: Web Protocols |
+| Command & Control | T1071.001 | Web Protocols |
 | Command & Control | T1219 | Remote Access Software |
 | Impact | T1486 | Data Encrypted for Impact |
 | Impact | T1489 | Service Stop |
 | Impact | T1552 | Unsecured Credentials |
+
+---
+
+## Recommended Mitigations
+
+- **Patch internet-facing services** — prioritize FortiGate and VPN appliances; apply vendor patches immediately
+- **Enforce MFA** on all administrative and domain accounts
+- **Monitor and restrict PowerShell** execution policies; enable script block logging
+- **Harden NETLOGON share** access and audit GPO modifications
+- **Deploy EDR** solutions with tamper protection enabled to resist kernel-level disabling
+- **Backup isolation** — ensure backups are offline or air-gapped and protected from domain admin credentials
+- **Shadow copy protection** — use Volume Shadow Copy Service (VSS) protections to prevent deletion
+- **Network segmentation** — limit lateral movement paths between workstations and servers
+- **Hunt for indicators** — scan for `.7mzhh` extensions, `README-GENTLEMEN.txt`, and the TOX ID listed above
+
+---
+
+## Indicators of Compromise (IoCs)
+
+| Type | Value |
+|---|---|
+| **File Extension** | `.7mzhh` |
+| **Ransom Note** | `README-GENTLEMEN.txt` |
+| **Email** | `negotiation_hapvida@proton.me` |
+| **TOX ID** | `ID88984846080D639C9A4EC394E53BA616D550B2B3AD691942EA2CCD33AA5B9340FD1A8FF40E9A` |
+| **Artifact** | `autorun.ini` / `autorun.inf` |
+| **Tools** | Advanced IP Scanner, Nmap, PsExec, PowerRun, PuTTY, WinSCP |
+
+---
+
+*This report is classified TLP:WHITE and may be shared freely. For questions or additional intelligence, contact the Threat Intelligence Team.*
