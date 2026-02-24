@@ -6,7 +6,7 @@ order: 4
 
 ## About
 
-I am Youssef Madkour (M4lB3nder). Cybersecurity engineer specializing in Malware Analysis, Reverse Engineering, and Kernel Programming.
+I'm M4lB3nder. Cybersecurity analyst specializing in Malware Analysis, Reverse Engineering, and Kernel Programming.
 Experienced in developing C/C++ & Python detection tools. Strong knowledge of Windows Internals, with a growing focus on Windows kernel development & Threats Intelligence.
 
 ## Focus Areas
